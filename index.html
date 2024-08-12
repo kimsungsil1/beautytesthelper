@@ -101,7 +101,10 @@
                 exams = data;
                 loadExamRounds();  // 회차를 로드
             })
-            .catch(error => console.error('Error loading JSON:', error));
+            .catch(error => {
+                console.error('Error loading JSON:', error);
+                alert('JSON 파일을 로드하는 중 문제가 발생했습니다.');
+            });
 
         // 시험 회차를 로드하는 함수
         function loadExamRounds() {
