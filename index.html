@@ -90,7 +90,7 @@
         let exams = {};
 
         // JSON 파일에서 시험 데이터를 로드
-        fetch('./questions.json')  // JSON 파일 경로를 명확히 설정
+        fetch('./questions.json')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
