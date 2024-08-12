@@ -108,7 +108,7 @@
         <!-- 문제를 표시하는 영역 -->
         <div id="quizContainer" style="display:none;"></div>
 
-        <button id="nextButton" onclick="showNextQuestion()" style="display:none;">다음</button>
+        <button id="nextButton" onclick="showNextQuestion()" style="display:none;" disabled>다음</button>
 
         <div id="result" class="result"></div>
 
@@ -201,6 +201,13 @@
                 </div>
                 <div id="feedback" class="feedback"></div>
             `;
+
+            // 답 선택 시 다음 버튼 활성화
+            document.querySelectorAll('input[name="answer"]').forEach(input => {
+                input.addEventListener('change', () => {
+                    document.getElementById('nextButton').disabled = false;
+                });
+            });
         }
 
         function showNextQuestion() {
@@ -218,20 +225,17 @@
                 feedbackElement.innerHTML = `<div class="incorrect">오답입니다. 정답: ${currentExam.questions[currentQuestionIndex].choices[currentExam.questions[currentQuestionIndex].answer]}. ${currentExam.questions[currentQuestionIndex].explanation}</div>`;
             }
 
+            document.getElementById('nextButton').disabled = true;
+
             currentQuestionIndex++;
             if (currentQuestionIndex >= currentExam.questions.length) {
                 document.getElementById('nextButton').innerText = '결과 보기';
+            } else {
+                document.getElementById('nextButton').disabled = false;
             }
         }
 
         function showResult() {
-            if (currentQuestionIndex < currentExam.questions.length) {
-                loadQuestion();
-                document.getElementById('feedback').innerHTML = ''; 
-                document.getElementById('nextButton').style.display = 'none';
-                return;
-            }
-
             document.getElementById('quizContainer').style.display = 'none';
             document.getElementById('nextButton').style.display = 'none';
             document.getElementById('result').innerText = `총 ${currentExam.questions.length}문제 중 ${score}문제를 맞추셨습니다.`;
