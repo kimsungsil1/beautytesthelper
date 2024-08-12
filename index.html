@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,36 +9,36 @@
 <body>
     <div class="container">
         <h1>미용사(피부) 국가고시 문제풀이</h1>
-        <div class="selector">
+        <div class="selection">
             <label for="examType">미용사 종류를 선택하세요:</label>
             <select id="examType">
                 <option value="skin">미용사(피부)</option>
             </select>
             <label for="examRound">시험 회차를 선택하세요:</label>
             <select id="examRound">
-                <option value="2022_01_skin_test60">2022년 1회차</option>
-                <option value="2022_02_skin_test60">2022년 2회차</option>
-                <option value="2022_03_skin_test60">2022년 3회차</option>
+                <option value="2022_01_skin_test60 - 시트1">2022년 1회차</option>
+                <option value="2022_02_skin_test60 - 시트1">2022년 2회차</option>
+                <option value="2022_03_skin_test60 - 시트1">2022년 3회차</option>
             </select>
             <button id="startButton">시작하기</button>
         </div>
-
-        <div id="questionContainer" class="hidden">
-            <div id="questionBox">
-                <p id="questionText"></p>
-                <ul id="optionsList">
-                    <!-- 옵션이 여기에 추가됩니다. -->
-                </ul>
-            </div>
+        <div id="quizContainer" class="hidden">
+            <p id="questionText">문제 1: 여기 문제가 표시됩니다.</p>
+            <form id="optionsForm">
+                <input type="radio" id="option1" name="option" value="0">
+                <label for="option1" id="label1">선택지1 내용</label><br>
+                <input type="radio" id="option2" name="option" value="1">
+                <label for="option2" id="label2">선택지2 내용</label><br>
+                <input type="radio" id="option3" name="option" value="2">
+                <label for="option3" id="label3">선택지3 내용</label><br>
+                <input type="radio" id="option4" name="option" value="3">
+                <label for="option4" id="label4">선택지4 내용</label><br>
+            </form>
             <button id="nextButton">다음</button>
+            <button id="restartButton">다시 시작하기</button>
             <button id="backButton">첫 화면으로 돌아가기</button>
         </div>
-
-        <div id="resultContainer" class="hidden">
-            <p id="resultText"></p>
-            <button id="restartButton">다시 시작하기</button>
-        </div>
     </div>
-    <script src="script.js"></script>
+    <script src="script.js"></script> <!-- JS 파일 링크 -->
 </body>
 </html>
