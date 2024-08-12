@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>미용사(피부) 국가고시 문제풀이</title>
+    <title>미용사 국가고시 문제풀이</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
@@ -61,16 +61,26 @@
 <body>
     <div class="container">
         <div class="header">
-            미용사(피부) 국가고시 문제풀이
+            미용사 국가고시 문제풀이
+        </div>
+
+        <!-- 미용사 종류 선택 -->
+        <div id="categorySelection">
+            <label for="categorySelect">미용사 종류를 선택하세요:</label>
+            <select id="categorySelect" onchange="loadExams()">
+                <option value="">선택하세요</option>
+                <option value="general">미용사(일반)</option>
+                <option value="skin">미용사(피부)</option>
+                <option value="nail">미용사 네일아트</option>
+                <option value="makeup">미용사 메이크업</option>
+            </select>
         </div>
 
         <!-- 회차 선택 -->
-        <div id="examSelection">
+        <div id="examSelection" style="display:none;">
             <label for="examSelect">시험 회차를 선택하세요:</label>
             <select id="examSelect">
-                <option value="exam1">2022년 1회차</option>
-                <option value="exam2">2023년 2회차</option>
-                <!-- 추가 회차 선택 -->
+                <!-- 회차 선택 옵션은 동적으로 로드됩니다 -->
             </select>
             <button onclick="startQuiz()">시작하기</button>
         </div>
@@ -98,13 +108,41 @@
                 exams = data;
             });
 
+        // 선택한 미용사 종류에 맞는 회차를 로드
+        function loadExams() {
+            const category = document.getElementById('categorySelect').value;
+            const examSelection = document.getElementById('examSelection');
+            const examSelect = document.getElementById('examSelect');
+
+            if (category) {
+                examSelection.style.display = 'block';
+                examSelect.innerHTML = '';
+                exams[category].forEach((exam, index) => {
+                    const option = document.createElement('option');
+                    option.value = `exam${index + 1}`;
+                    option.text = exam.title;
+                    examSelect.appendChild(option);
+                });
+            } else {
+                examSelection.style.display = 'none';
+            }
+        }
+
         // 퀴즈 시작
         function startQuiz() {
+            const selectedCategory = document.getElementById('categorySelect').value;
             const selectedExam = document.getElementById('examSelect').value;
-            currentExam = exams[selectedExam];
+
+            if (!selectedExam) {
+                alert("시험 회차를 선택하세요!");
+                return;
+            }
+
+            currentExam = exams[selectedCategory].find((exam, index) => `exam${index + 1}` === selectedExam);
             currentQuestionIndex = 0;
             score = 0;
 
+            document.getElementById('categorySelection').style.display = 'none';
             document.getElementById('examSelection').style.display = 'none';
             document.getElementById('quizContainer').style.display = 'block';
             document.getElementById('nextButton').style.display = 'block';
