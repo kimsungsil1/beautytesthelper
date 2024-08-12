@@ -70,6 +70,20 @@
             font-weight: bold;
             color: #ffa64d;
         }
+        .back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #999;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .back-button:hover {
+            background-color: #777;
+        }
     </style>
 </head>
 <body>
@@ -83,7 +97,6 @@
             <label for="examTypeSelect">미용사 종류를 선택하세요:</label>
             <select id="examTypeSelect">
                 <option value="미용사(피부)">미용사(피부)</option>
-                <!-- 다른 미용사 종류 추가 가능 -->
             </select>
 
             <label for="examSelect">시험 회차를 선택하세요:</label>
@@ -98,6 +111,9 @@
         <button id="nextButton" onclick="showNextQuestion()" style="display:none;">다음</button>
 
         <div id="result" class="result"></div>
+
+        <!-- 첫 화면으로 돌아가는 버튼 -->
+        <button id="backButton" class="back-button" style="display:none;" onclick="goToHome()">첫 화면으로 돌아가기</button>
     </div>
 
     <script>
@@ -135,29 +151,24 @@
                 examSelect.appendChild(option);
             });
 
-            // 시험 회차가 있는지 확인
             if (rounds.length === 0) {
                 alert('해당 미용사 종류에 대한 시험 회차가 없습니다.');
             }
         }
 
-        // 시험 종류를 선택하면 회차를 로드
         document.getElementById('examTypeSelect').addEventListener('change', loadExamRounds);
 
-        // 페이지 로드 시 기본 회차 로드
         loadExamRounds();
 
         let currentExam = null;
         let currentQuestionIndex = 0;
         let score = 0;
 
-        // 퀴즈 시작
         function startQuiz() {
             const selectedExamType = document.getElementById('examTypeSelect').value;
             const selectedRound = document.getElementById('examSelect').value;
             currentExam = exams[selectedExamType];
 
-            // 회차가 선택되지 않았거나 데이터가 없는 경우 처리
             if (!currentExam || !currentExam.questions) {
                 alert('유효한 시험 회차를 선택하세요.');
                 return;
@@ -169,11 +180,11 @@
             document.getElementById('examSelection').style.display = 'none';
             document.getElementById('quizContainer').style.display = 'block';
             document.getElementById('nextButton').style.display = 'block';
+            document.getElementById('backButton').style.display = 'block';
 
             loadQuestion();
         }
 
-        // 현재 질문을 로드하여 표시
         function loadQuestion() {
             const quizContainer = document.getElementById('quizContainer');
             const questionData = currentExam.questions[currentQuestionIndex];
@@ -192,7 +203,6 @@
             `;
         }
 
-        // 다음 질문을 표시하거나 결과를 표시
         function showNextQuestion() {
             const selectedAnswer = document.querySelector('input[name="answer"]:checked');
             const feedbackElement = document.getElementById('feedback');
@@ -208,21 +218,16 @@
                 feedbackElement.innerHTML = `<div class="incorrect">오답입니다. 정답: ${currentExam.questions[currentQuestionIndex].choices[currentExam.questions[currentQuestionIndex].answer]}. ${currentExam.questions[currentQuestionIndex].explanation}</div>`;
             }
 
-            // 다음 문제로 넘어가기 전 "다음" 버튼 활성화
-            document.getElementById('nextButton').disabled = false;
-
-            // 만약 다음 질문이 없다면 결과 표시
             currentQuestionIndex++;
             if (currentQuestionIndex >= currentExam.questions.length) {
                 document.getElementById('nextButton').innerText = '결과 보기';
             }
         }
 
-        // 결과를 표시
         function showResult() {
             if (currentQuestionIndex < currentExam.questions.length) {
                 loadQuestion();
-                document.getElementById('feedback').innerHTML = '';  // 이전 피드백 초기화
+                document.getElementById('feedback').innerHTML = ''; 
                 document.getElementById('nextButton').style.display = 'none';
                 return;
             }
@@ -231,6 +236,14 @@
             document.getElementById('nextButton').style.display = 'none';
             document.getElementById('result').innerText = `총 ${currentExam.questions.length}문제 중 ${score}문제를 맞추셨습니다.`;
             document.getElementById('result').style.display = 'block';
+        }
+
+        function goToHome() {
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('nextButton').style.display = 'none';
+            document.getElementById('backButton').style.display = 'none';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('examSelection').style.display = 'block';
         }
     </script>
 </body>
