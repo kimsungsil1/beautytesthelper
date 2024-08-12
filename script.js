@@ -13,6 +13,7 @@ document.getElementById("startButton").addEventListener("click", function () {
         .then(data => {
             console.log("CSV file loaded successfully");
             questions = parseCSV(data);
+            console.log(questions); // CSV 파일이 제대로 파싱되었는지 확인
             document.querySelector(".selection").classList.add("hidden");
             document.getElementById("quizContainer").classList.remove("hidden");
             startQuiz();
