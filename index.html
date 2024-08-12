@@ -2,8 +2,8 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>미용사(피부) 국가고시 문제풀이</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>미용사(피부) 국가고시 문제풀이</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -90,7 +90,7 @@
         let exams = {};
 
         // JSON 파일에서 시험 데이터를 로드
-        fetch('questions.json')
+        fetch('./questions.json')  // JSON 파일 경로를 명확히 설정
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
