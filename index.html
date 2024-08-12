@@ -95,14 +95,17 @@
 
         function startQuiz() {
             const selectedFile = document.getElementById('examSelect').value;
+            console.log("Selected file:", selectedFile); // 파일 선택 확인용 로그
             loadCSV(selectedFile);
         }
 
         function loadCSV(fileName) {
+            console.log("Loading file: " + fileName); // 파일 로딩 확인용 로그
             Papa.parse(fileName, {
                 download: true,
                 header: true,
                 complete: function(results) {
+                    console.log("CSV loaded:", results.data); // CSV 로드 확인용 로그
                     questions = results.data;
                     currentQuestionIndex = 0;
                     score = 0;
@@ -113,6 +116,10 @@
                     document.getElementById('backButton').style.display = 'block';
 
                     loadQuestion();
+                },
+                error: function(error) {
+                    console.error("Error loading CSV:", error); // 에러 확인용 로그
+                    alert("CSV 파일을 불러오는 중 오류가 발생했습니다.");
                 }
             });
         }
