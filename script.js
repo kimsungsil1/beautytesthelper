@@ -12,8 +12,9 @@ document.getElementById("startButton").addEventListener("click", function () {
         })
         .then(data => {
             console.log("CSV file loaded successfully");
+            console.log(data); // CSV 원본 데이터를 콘솔에 출력하여 형식을 확인
             questions = parseCSV(data);
-            console.log(questions); // CSV 파일이 제대로 파싱되었는지 확인
+            console.log(questions); // 파싱된 질문 데이터 확인
             document.querySelector(".selection").classList.add("hidden");
             document.getElementById("quizContainer").classList.remove("hidden");
             startQuiz();
@@ -31,7 +32,10 @@ function parseCSV(data) {
 
     for (let i = 1; i < lines.length; i++) {
         const currentline = lines[i].split(",");
-        if (currentline.length < headers.length) continue; // 빈 줄 또는 불완전한 줄 건너뛰기
+        if (currentline.length < headers.length) {
+            console.log(`Skipping line ${i}: incomplete data`);
+            continue; // 빈 줄 또는 불완전한 줄 건너뛰기
+        }
 
         const obj = {};
         for (let j = 0; j < headers.length; j++) {
