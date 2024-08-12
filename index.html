@@ -208,22 +208,25 @@
                 feedbackElement.innerHTML = `<div class="incorrect">오답입니다. 정답: ${currentExam.questions[currentQuestionIndex].choices[currentExam.questions[currentQuestionIndex].answer]}. ${currentExam.questions[currentQuestionIndex].explanation}</div>`;
             }
 
-            // 다음 문제로 넘어가기 전에 피드백을 잠시 표시하고 버튼을 비활성화 방지
-            document.getElementById('nextButton').disabled = true;
-            setTimeout(() => {
-                currentQuestionIndex++;
-                if (currentQuestionIndex < currentExam.questions.length) {
-                    loadQuestion();
-                    feedbackElement.innerHTML = ''; // 피드백 초기화
-                    document.getElementById('nextButton').disabled = false;
-                } else {
-                    showResult();
-                }
-            }, 1500);
+            // 다음 문제로 넘어가기 전 "다음" 버튼 활성화
+            document.getElementById('nextButton').disabled = false;
+
+            // 만약 다음 질문이 없다면 결과 표시
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= currentExam.questions.length) {
+                document.getElementById('nextButton').innerText = '결과 보기';
+            }
         }
 
         // 결과를 표시
         function showResult() {
+            if (currentQuestionIndex < currentExam.questions.length) {
+                loadQuestion();
+                document.getElementById('feedback').innerHTML = '';  // 이전 피드백 초기화
+                document.getElementById('nextButton').style.display = 'none';
+                return;
+            }
+
             document.getElementById('quizContainer').style.display = 'none';
             document.getElementById('nextButton').style.display = 'none';
             document.getElementById('result').innerText = `총 ${currentExam.questions.length}문제 중 ${score}문제를 맞추셨습니다.`;
