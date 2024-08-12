@@ -1,100 +1,114 @@
+// 글로벌 변수 선언
 let currentQuestionIndex = 0;
 let questions = [];
-let selectedAnswers = [];
+let score = 0;
 
-document.getElementById('startButton').addEventListener('click', function () {
-    const examRound = document.getElementById('examRound').value;
+// CSV 파일 파싱 함수
+function parseCSV(csv) {
+    const lines = csv.split("\n");
+    const result = [];
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line) {
+            const values = line.split(",");
+            result.push({
+                question: values[1],
+                options: [values[2], values[3], values[4], values[5]],
+                correctAnswer: parseInt(values[6]) - 1, // 0-based index for answers
+                explanation: values[7]
+            });
+        }
+    }
+
+    return result;
+}
+
+// 퀴즈 시작 함수
+function startQuiz() {
+    currentQuestionIndex = 0;
+    score = 0;
+    showQuestion();
+}
+
+// 질문 표시 함수
+function showQuestion() {
+    if (currentQuestionIndex >= questions.length) {
+        showScore();
+        return;
+    }
+
+    const questionData = questions[currentQuestionIndex];
+    document.getElementById("question").innerText = `문제 ${currentQuestionIndex + 1}: ${questionData.question}`;
+
+    for (let i = 0; i < 4; i++) {
+        const optionElement = document.getElementById(`option${i + 1}`);
+        optionElement.innerText = questionData.options[i];
+    }
+}
+
+// 선택한 답변 검사 함수
+function checkAnswer(selectedIndex) {
+    const questionData = questions[currentQuestionIndex];
+    const resultElement = document.getElementById("result");
+
+    if (selectedIndex === questionData.correctAnswer) {
+        score++;
+        resultElement.innerText = `정답입니다! 정답: ${questionData.options[selectedIndex]}.`;
+    } else {
+        resultElement.innerText = `오답입니다. 정답은 ${questionData.options[questionData.correctAnswer]}입니다. 해설: ${questionData.explanation}`;
+    }
+
+    currentQuestionIndex++;
+    document.getElementById("nextButton").disabled = false;
+}
+
+// 다음 질문으로 이동하는 함수
+function nextQuestion() {
+    document.getElementById("result").innerText = "";
+    document.getElementById("nextButton").disabled = true;
+    showQuestion();
+}
+
+// 점수 표시 함수
+function showScore() {
+    document.getElementById("quizContainer").style.display = "none";
+    document.getElementById("scoreContainer").style.display = "block";
+    document.getElementById("score").innerText = `점수: ${score}/${questions.length}`;
+}
+
+// 퀴즈 다시 시작 함수
+function resetQuiz() {
+    document.getElementById("scoreContainer").style.display = "none";
+    document.getElementById("quizContainer").style.display = "block";
+    startQuiz();
+}
+
+// 이벤트 리스너 추가
+document.getElementById("startButton").addEventListener("click", function () {
+    const examRound = document.getElementById("examRound").value;
     fetch(`${examRound}.csv`)
-        .then(response => response.text())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.text();
+        })
         .then(data => {
             questions = parseCSV(data);
             startQuiz();
         })
         .catch(error => {
-            alert('CSV 파일을 불러오는 중 오류가 발생했습니다.');
-            console.error(error);
+            alert("CSV 파일을 불러오는 중 오류가 발생했습니다.");
+            console.error("Error loading CSV file:", error);
         });
 });
 
-function parseCSV(data) {
-    const lines = data.split('\n');
-    return lines.map(line => {
-        const [number, question, option1, option2, option3, option4, correctAnswer, explanation] = line.split(',');
-        return {
-            number,
-            question,
-            options: [option1, option2, option3, option4],
-            correctAnswer: parseInt(correctAnswer.trim(), 10),
-            explanation
-        };
+document.getElementById("nextButton").addEventListener("click", nextQuestion);
+document.getElementById("resetButton").addEventListener("click", resetQuiz);
+
+for (let i = 0; i < 4; i++) {
+    document.getElementById(`option${i + 1}`).addEventListener("click", function () {
+        checkAnswer(i);
     });
 }
-
-function startQuiz() {
-    document.querySelector('.selector').classList.add('hidden');
-    document.getElementById('questionContainer').classList.remove('hidden');
-    showQuestion();
-}
-
-function showQuestion() {
-    const questionData = questions[currentQuestionIndex];
-    document.getElementById('questionText').innerText = `문제 ${questionData.number}: ${questionData.question}`;
-    const optionsList = document.getElementById('optionsList');
-    optionsList.innerHTML = '';
-
-    questionData.options.forEach((option, index) => {
-        const li = document.createElement('li');
-        const input = document.createElement('input');
-        input.type = 'radio';
-        input.name = 'option';
-        input.value = index + 1;
-        input.id = `option${index + 1}`;
-        const label = document.createElement('label');
-        label.htmlFor = `option${index + 1}`;
-        label.innerText = option;
-
-        li.appendChild(input);
-        li.appendChild(label);
-        optionsList.appendChild(li);
-    });
-}
-
-document.getElementById('nextButton').addEventListener('click', function () {
-    const selectedOption = document.querySelector('input[name="option"]:checked');
-    if (selectedOption) {
-        const selectedAnswer = parseInt(selectedOption.value, 10);
-        selectedAnswers.push(selectedAnswer);
-
-        const correctAnswer = questions[currentQuestionIndex].correctAnswer;
-        if (selectedAnswer === correctAnswer) {
-            alert('정답입니다!');
-        } else {
-            alert(`오답입니다. 정답: ${correctAnswer}, 해설: ${questions[currentQuestionIndex].explanation}`);
-        }
-
-        currentQuestionIndex++;
-        if (currentQuestionIndex < questions.length) {
-            showQuestion();
-        } else {
-            endQuiz();
-        }
-    } else {
-        alert('정답을 선택해주세요.');
-    }
-});
-
-document.getElementById('backButton').addEventListener('click', function () {
-    window.location.reload();
-});
-
-function endQuiz() {
-    document.getElementById('questionContainer').classList.add('hidden');
-    document.getElementById('resultContainer').classList.remove('hidden');
-
-    const score = selectedAnswers.filter((answer, index) => answer === questions[index].correctAnswer).length;
-    document.getElementById('resultText').innerText = `퀴즈 완료! 당신의 점수는 ${score}점입니다.`;
-}
-
-document.getElementById('restartButton').addEventListener('click', function () {
-    window.location.reload();
-});
