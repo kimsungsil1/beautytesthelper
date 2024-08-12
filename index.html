@@ -37,6 +37,20 @@
             display: block;
             margin: 5px 0;
         }
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
         button {
             padding: 10px 20px;
             font-size: 16px;
@@ -174,12 +188,14 @@
                     <label><input type="radio" name="answer" value="2">${questionData.choices[2]}</label>
                     <label><input type="radio" name="answer" value="3">${questionData.choices[3]}</label>
                 </div>
+                <div id="feedback" class="feedback"></div>
             `;
         }
 
         // 다음 질문을 표시하거나 결과를 표시
         function showNextQuestion() {
             const selectedAnswer = document.querySelector('input[name="answer"]:checked');
+            const feedbackElement = document.getElementById('feedback');
             if (!selectedAnswer) {
                 alert("답을 선택해주세요!");
                 return;
@@ -187,19 +203,30 @@
 
             if (parseInt(selectedAnswer.value) === currentExam.questions[currentQuestionIndex].answer) {
                 score++;
+                feedbackElement.innerHTML = `<div class="correct">정답입니다! ${currentExam.questions[currentQuestionIndex].explanation}</div>`;
+            } else {
+                feedbackElement.innerHTML = `<div class="incorrect">오답입니다. 정답: ${currentExam.questions[currentQuestionIndex].choices[currentExam.questions[currentQuestionIndex].answer]}. ${currentExam.questions[currentQuestionIndex].explanation}</div>`;
             }
 
-            currentQuestionIndex++;
+            // 다음 문제로 넘어가기 전 버튼 비활성화 방지
+            document.getElementById('nextButton').style.display = 'block';
 
-            if (currentQuestionIndex < currentExam.questions.length) {
-                loadQuestion();
-            } else {
-                showResult();
+            // 만약 다음 질문이 없다면 결과 표시
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= currentExam.questions.length) {
+                document.getElementById('nextButton').innerText = '결과 보기';
             }
         }
 
         // 결과를 표시
         function showResult() {
+            if (currentQuestionIndex < currentExam.questions.length) {
+                loadQuestion();
+                document.getElementById('feedback').innerHTML = '';  // 이전 피드백 초기화
+                document.getElementById('nextButton').style.display = 'none';
+                return;
+            }
+
             document.getElementById('quizContainer').style.display = 'none';
             document.getElementById('nextButton').style.display = 'none';
             document.getElementById('result').innerText = `총 ${currentExam.questions.length}문제 중 ${score}문제를 맞추셨습니다.`;
