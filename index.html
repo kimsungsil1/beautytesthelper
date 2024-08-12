@@ -66,6 +66,12 @@
 
         <!-- 시험 종류 및 회차 선택 -->
         <div id="examSelection">
+            <label for="examTypeSelect">미용사 종류를 선택하세요:</label>
+            <select id="examTypeSelect">
+                <option value="미용사(피부)">미용사(피부)</option>
+                <!-- 다른 미용사 종류 추가 가능 -->
+            </select>
+
             <label for="examSelect">시험 회차를 선택하세요:</label>
             <select id="examSelect">
                 <option value="2022_01_skin_test60 - 시트1.csv">2022년 1회차</option>
@@ -80,117 +86,11 @@
 
         <button id="nextButton" onclick="showNextQuestion()" style="display:none;">다음</button>
 
-        <button id="returnButton" onclick="returnToStart()" style="display:none;">첫 화면으로 돌아가기</button>
-
         <div id="result" class="result"></div>
+        <button id="backButton" style="display:none;" onclick="goBack()">첫 화면으로 돌아가기</button>
     </div>
 
-    <script>
-        let exams = {};
-        let currentExam = null;
-        let currentQuestionIndex = 0;
-        let score = 0;
-
-        function startQuiz() {
-            const selectedExam = document.getElementById('examSelect').value;
-            fetch(selectedExam)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    const parsedData = parseCSV(data);
-                    exams = parsedData;
-                    currentExam = exams;
-
-                    if (!currentExam || !currentExam.questions) {
-                        alert('유효한 시험 회차를 선택하세요.');
-                        return;
-                    }
-
-                    currentQuestionIndex = 0;
-                    score = 0;
-
-                    document.getElementById('examSelection').style.display = 'none';
-                    document.getElementById('quizContainer').style.display = 'block';
-                    document.getElementById('nextButton').style.display = 'block';
-                    document.getElementById('returnButton').style.display = 'block';
-
-                    loadQuestion();
-                })
-                .catch(error => {
-                    console.error('Error loading CSV:', error);
-                    alert('CSV 파일을 불러오는 중 오류가 발생했습니다.');
-                });
-        }
-
-        function parseCSV(data) {
-            const rows = data.split('\n').slice(1);
-            const questions = rows.map(row => {
-                const cols = row.split(',');
-                return {
-                    question: cols[1],
-                    choices: [cols[2], cols[3], cols[4], cols[5]],
-                    answer: parseInt(cols[6]),
-                    explanation: cols[7]
-                };
-            });
-
-            return { questions };
-        }
-
-        function loadQuestion() {
-            const quizContainer = document.getElementById('quizContainer');
-            const questionData = currentExam.questions[currentQuestionIndex];
-
-            quizContainer.innerHTML = `
-                <div class="question">
-                    <label>문제 ${currentQuestionIndex + 1}: ${questionData.question}</label>
-                </div>
-                <div class="choices">
-                    ${questionData.choices.map((choice, index) => `
-                        <label><input type="radio" name="answer" value="${index}"> ${choice}</label>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        function showNextQuestion() {
-            const selectedAnswer = document.querySelector('input[name="answer"]:checked');
-            if (!selectedAnswer) {
-                alert("답을 선택해주세요!");
-                return;
-            }
-
-            if (parseInt(selectedAnswer.value) === currentExam.questions[currentQuestionIndex].answer) {
-                score++;
-            }
-
-            currentQuestionIndex++;
-
-            if (currentQuestionIndex < currentExam.questions.length) {
-                loadQuestion();
-            } else {
-                showResult();
-            }
-        }
-
-        function showResult() {
-            document.getElementById('quizContainer').style.display = 'none';
-            document.getElementById('nextButton').style.display = 'none';
-            document.getElementById('result').innerText = `총 ${currentExam.questions.length}문제 중 ${score}문제를 맞추셨습니다.`;
-            document.getElementById('result').style.display = 'block';
-        }
-
-        function returnToStart() {
-            document.getElementById('quizContainer').style.display = 'none';
-            document.getElementById('nextButton').style.display = 'none';
-            document.getElementById('result').style.display = 'none';
-            document.getElementById('returnButton').style.display = 'none';
-            document.getElementById('examSelection').style.display = 'block';
-        }
-    </script>
+    <!-- 외부 자바스크립트 파일을 불러옵니다. -->
+    <script src="script.js"></script>
 </body>
 </html>
