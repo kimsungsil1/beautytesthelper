@@ -37,20 +37,6 @@
             display: block;
             margin: 5px 0;
         }
-        .feedback {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        .correct {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .incorrect {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
         button {
             padding: 10px 20px;
             font-size: 16px;
@@ -70,19 +56,8 @@
             font-weight: bold;
             color: #ffa64d;
         }
-        .back-button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #999;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-        .back-button:hover {
-            background-color: #777;
+        #backButton {
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -94,13 +69,11 @@
 
         <!-- 시험 종류 및 회차 선택 -->
         <div id="examSelection">
-            <label for="examTypeSelect">미용사 종류를 선택하세요:</label>
-            <select id="examTypeSelect">
-                <option value="미용사(피부)">미용사(피부)</option>
-            </select>
-
             <label for="examSelect">시험 회차를 선택하세요:</label>
-            <select id="examSelect"></select>
+            <select id="examSelect">
+                <option value="2022_01_skin_test60.csv">2022년 1회차</option>
+                <option value="2022_02_skin_test60.csv">2022년 2회차</option>
+            </select>
 
             <button onclick="startQuiz()">시작하기</button>
         </div>
@@ -108,145 +81,94 @@
         <!-- 문제를 표시하는 영역 -->
         <div id="quizContainer" style="display:none;"></div>
 
-        <button id="nextButton" onclick="showNextQuestion()" style="display:none;" disabled>다음</button>
+        <button id="nextButton" onclick="showNextQuestion()" style="display:none;">다음</button>
+        <button id="backButton" onclick="goBack()" style="display:none;">첫 화면으로 돌아가기</button>
 
         <div id="result" class="result"></div>
-
-        <!-- 첫 화면으로 돌아가는 버튼 -->
-        <button id="backButton" class="back-button" style="display:none;" onclick="goToHome()">첫 화면으로 돌아가기</button>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script>
-        let exams = {};
-
-        // JSON 파일에서 시험 데이터를 로드
-        fetch('./questions.json')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                exams = data;
-                loadExamRounds();  // 회차를 로드
-            })
-            .catch(error => {
-                console.error('Error loading JSON:', error);
-                alert('JSON 파일을 로드하는 중 문제가 발생했습니다.');
-            });
-
-        // 시험 회차를 로드하는 함수
-        function loadExamRounds() {
-            const examSelect = document.getElementById('examSelect');
-            examSelect.innerHTML = '';  // 기존 옵션 초기화
-
-            const selectedExamType = document.getElementById('examTypeSelect').value;
-            const rounds = exams[selectedExamType]?.rounds || [];
-
-            rounds.forEach(round => {
-                const option = document.createElement('option');
-                option.value = round.id;
-                option.textContent = round.name;
-                examSelect.appendChild(option);
-            });
-
-            if (rounds.length === 0) {
-                alert('해당 미용사 종류에 대한 시험 회차가 없습니다.');
-            }
-        }
-
-        document.getElementById('examTypeSelect').addEventListener('change', loadExamRounds);
-
-        loadExamRounds();
-
-        let currentExam = null;
+        let questions = [];
         let currentQuestionIndex = 0;
         let score = 0;
 
         function startQuiz() {
-            const selectedExamType = document.getElementById('examTypeSelect').value;
-            const selectedRound = document.getElementById('examSelect').value;
-            currentExam = exams[selectedExamType];
+            const selectedFile = document.getElementById('examSelect').value;
+            loadCSV(selectedFile);
+        }
 
-            if (!currentExam || !currentExam.questions) {
-                alert('유효한 시험 회차를 선택하세요.');
-                return;
-            }
+        function loadCSV(fileName) {
+            Papa.parse(fileName, {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    questions = results.data;
+                    currentQuestionIndex = 0;
+                    score = 0;
 
-            currentQuestionIndex = 0;
-            score = 0;
+                    document.getElementById('examSelection').style.display = 'none';
+                    document.getElementById('quizContainer').style.display = 'block';
+                    document.getElementById('nextButton').style.display = 'block';
+                    document.getElementById('backButton').style.display = 'block';
 
-            document.getElementById('examSelection').style.display = 'none';
-            document.getElementById('quizContainer').style.display = 'block';
-            document.getElementById('nextButton').style.display = 'block';
-            document.getElementById('backButton').style.display = 'block';
-
-            loadQuestion();
+                    loadQuestion();
+                }
+            });
         }
 
         function loadQuestion() {
             const quizContainer = document.getElementById('quizContainer');
-            const questionData = currentExam.questions[currentQuestionIndex];
+            const questionData = questions[currentQuestionIndex];
 
             quizContainer.innerHTML = `
                 <div class="question">
-                    <label>문제 ${currentQuestionIndex + 1}: ${questionData.question}</label>
+                    <label>문제 ${currentQuestionIndex + 1}: ${questionData.문제}</label>
                 </div>
                 <div class="choices">
-                    <label><input type="radio" name="answer" value="0"> 1. ${questionData.choices[0]}</label>
-                    <label><input type="radio" name="answer" value="1"> 2. ${questionData.choices[1]}</label>
-                    <label><input type="radio" name="answer" value="2"> 3. ${questionData.choices[2]}</label>
-                    <label><input type="radio" name="answer" value="3"> 4. ${questionData.choices[3]}</label>
+                    <label><input type="radio" name="answer" value="0"> ① ${questionData.선택지1}</label>
+                    <label><input type="radio" name="answer" value="1"> ② ${questionData.선택지2}</label>
+                    <label><input type="radio" name="answer" value="2"> ③ ${questionData.선택지3}</label>
+                    <label><input type="radio" name="answer" value="3"> ④ ${questionData.선택지4}</label>
                 </div>
-                <div id="feedback" class="feedback"></div>
             `;
-
-            // 답 선택 시 다음 버튼 활성화
-            document.querySelectorAll('input[name="answer"]').forEach(input => {
-                input.addEventListener('change', () => {
-                    document.getElementById('nextButton').disabled = false;
-                });
-            });
         }
 
         function showNextQuestion() {
             const selectedAnswer = document.querySelector('input[name="answer"]:checked');
-            const feedbackElement = document.getElementById('feedback');
             if (!selectedAnswer) {
                 alert("답을 선택해주세요!");
                 return;
             }
 
-            if (parseInt(selectedAnswer.value) === currentExam.questions[currentQuestionIndex].answer) {
+            const isCorrect = parseInt(selectedAnswer.value) === parseInt(questions[currentQuestionIndex].정답인덱스);
+            if (isCorrect) {
                 score++;
-                feedbackElement.innerHTML = `<div class="correct">정답입니다! ${currentExam.questions[currentQuestionIndex].explanation}</div>`;
-            } else {
-                feedbackElement.innerHTML = `<div class="incorrect">오답입니다. 정답: ${currentExam.questions[currentQuestionIndex].choices[currentExam.questions[currentQuestionIndex].answer]}. ${currentExam.questions[currentQuestionIndex].explanation}</div>`;
             }
 
-            document.getElementById('nextButton').disabled = true;
+            alert(isCorrect ? "정답입니다!" : "오답입니다. 정답: " + questions[currentQuestionIndex][`선택지${parseInt(questions[currentQuestionIndex].정답인덱스) + 1}`] + "\n해설: " + questions[currentQuestionIndex].해설);
 
             currentQuestionIndex++;
-            if (currentQuestionIndex >= currentExam.questions.length) {
-                document.getElementById('nextButton').innerText = '결과 보기';
+
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
             } else {
-                document.getElementById('nextButton').disabled = false;
+                showResult();
             }
         }
 
         function showResult() {
             document.getElementById('quizContainer').style.display = 'none';
             document.getElementById('nextButton').style.display = 'none';
-            document.getElementById('result').innerText = `총 ${currentExam.questions.length}문제 중 ${score}문제를 맞추셨습니다.`;
+            document.getElementById('result').innerText = `총 ${questions.length}문제 중 ${score}문제를 맞추셨습니다.`;
             document.getElementById('result').style.display = 'block';
         }
 
-        function goToHome() {
+        function goBack() {
             document.getElementById('quizContainer').style.display = 'none';
             document.getElementById('nextButton').style.display = 'none';
-            document.getElementById('backButton').style.display = 'none';
             document.getElementById('result').style.display = 'none';
+            document.getElementById('backButton').style.display = 'none';
             document.getElementById('examSelection').style.display = 'block';
         }
     </script>
