@@ -116,6 +116,11 @@
         function startQuiz() {
             const selectedExam = document.getElementById('examSelect').value;
             questions = examData[selectedExam];
+            if (!questions || questions.length === 0) {
+                alert("문제를 로드하는 데 실패했습니다. 데이터를 확인하세요.");
+                return;
+            }
+
             currentQuestionIndex = 0;
             score = 0;
 
