@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>미용사(피부) 국가고시 문제풀이</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .question label {
+            font-weight: bold;
+        }
+        .choices label {
+            display: block;
+            margin: 5px 0;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #357ABD;
+        }
+        .result {
+            display: none;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #4a90e2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            미용사(피부) 국가고시 문제풀이
+        </div>
+
+        <!-- 회차 선택 -->
+        <div id="examSelection">
+            <label for="examSelect">시험 회차를 선택하세요:</label>
+            <select id="examSelect">
+                <option value="exam1">2022년 1회차</option>
+                <option value="exam2">2023년 2회차</option>
+                <!-- 추가 회차 선택 -->
+            </select>
+            <button onclick="startQuiz()">시작하기</button>
+        </div>
+
+        <!-- 문제를 표시하는 영역 -->
+        <div id="quizContainer" style="display:none;">
+            <!-- 동적으로 문제를 표시합니다 -->
+        </div>
+
+        <button id="nextButton" onclick="showNextQuestion()" style="display:none;">다음</button>
+
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        let exams = {};
+        let currentExam = null;
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        // JSON 파일에서 시험 데이터를 로드
+        fetch('questions.json')
+            .then(response => response.json())
+            .then(data => {
+                exams = data;
+            });
+
+        // 퀴즈 시작
+        function startQuiz() {
+            const selectedExam = document.getElementById('examSelect').value;
+            currentExam = exams[selectedExam];
+            currentQuestionIndex = 0;
+            score = 0;
+
+            document.getElementById('examSelection').style.display = 'none';
+            document.getElementById('quizContainer').style.display = 'block';
+            document.getElementById('nextButton').style.display = 'block';
+
+            loadQuestion();
+        }
+
+        // 현재 질문을 로드하여 표시
+        function loadQuestion() {
+            const quizContainer = document.getElementById('quizContainer');
+            const questionData = currentExam.questions[currentQuestionIndex];
+
+            quizContainer.innerHTML = `
+                <div class="question">
+                    <label>${questionData.question}</label>
+                </div>
+                <div class="choices">
+                    <label><input type="radio" name="answer" value="0">${questionData.choices[0]}</label>
+                    <label><input type="radio" name="answer" value="1">${questionData.choices[1]}</label>
+                    <label><input type="radio" name="answer" value="2">${questionData.choices[2]}</label>
+                    <label><input type="radio" name="answer" value="3">${questionData.choices[3]}</label>
+                </div>
+            `;
+        }
+
+        // 다음 질문을 표시하거나 결과를 표시
+        function showNextQuestion() {
+            const selectedAnswer = document.querySelector('input[name="answer"]:checked');
+            if (!selectedAnswer) {
+                alert("답을 선택해주세요!");
+                return;
+            }
+
+            if (parseInt(selectedAnswer.value) === currentExam.questions[currentQuestionIndex].answer) {
+                score++;
+            }
+
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < currentExam.questions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        // 결과를 표시
+        function showResult() {
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('nextButton').style.display = 'none';
+            document.getElementById('result').innerText = `총 ${currentExam.questions.length}문제 중 ${score}문제를 맞추셨습니다.`;
+            document.getElementById('result').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
