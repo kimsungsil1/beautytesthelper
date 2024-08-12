@@ -29,9 +29,10 @@ function parseCSV(data) {
     const headers = lines[0].split(",");
 
     for (let i = 1; i < lines.length; i++) {
-        const obj = {};
         const currentline = lines[i].split(",");
+        if (currentline.length < headers.length) continue; // 빈 줄 또는 불완전한 줄 건너뛰기
 
+        const obj = {};
         for (let j = 0; j < headers.length; j++) {
             obj[headers[j].trim()] = currentline[j].trim();
         }
