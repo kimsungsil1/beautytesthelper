@@ -1,10 +1,8 @@
-let questions = [];
-let currentQuestionIndex = 0;
-
 document.getElementById("startButton").addEventListener("click", function () {
     const examRound = document.getElementById("examRound").value;
     const filePath = `${examRound}.csv`;
-    
+    console.log("Loading CSV file from:", filePath);
+
     fetch(filePath)
         .then(response => {
             if (!response.ok) {
@@ -13,6 +11,7 @@ document.getElementById("startButton").addEventListener("click", function () {
             return response.text();
         })
         .then(data => {
+            console.log("CSV file loaded successfully");
             questions = parseCSV(data);
             document.querySelector(".selection").classList.add("hidden");
             document.getElementById("quizContainer").classList.remove("hidden");
@@ -24,57 +23,59 @@ document.getElementById("startButton").addEventListener("click", function () {
         });
 });
 
-document.getElementById("nextButton").addEventListener("click", function () {
-    const selectedOption = document.querySelector('input[name="option"]:checked');
-    if (selectedOption) {
-        const answerIndex = questions[currentQuestionIndex].정답인덱스;
-        const isCorrect = parseInt(selectedOption.value) === parseInt(answerIndex);
-        alert(isCorrect ? "정답입니다!" : `틀렸습니다. 정답은 ${parseInt(answerIndex) + 1}번입니다.`);
-        currentQuestionIndex++;
-        if (currentQuestionIndex < questions.length) {
-            displayQuestion();
-        } else {
-            alert("모든 문제를 풀었습니다. 다시 시작합니다.");
-            restartQuiz();
-        }
-    } else {
-        alert("답을 선택하세요.");
-    }
-});
-
-document.getElementById("restartButton").addEventListener("click", restartQuiz);
-document.getElementById("backButton").addEventListener("click", function () {
-    document.getElementById("quizContainer").classList.add("hidden");
-    document.querySelector(".selection").classList.remove("hidden");
-});
-
 function parseCSV(data) {
-    const rows = data.split("\n").map(row => row.split(","));
-    const keys = rows[0];
-    return rows.slice(1).map(row => {
-        let obj = {};
-        row.forEach((cell, i) => {
-            obj[keys[i]] = cell;
-        });
-        return obj;
-    });
+    const lines = data.split("\n");
+    const result = [];
+    const headers = lines[0].split(",");
+    
+    for (let i = 1; i < lines.length; i++) {
+        const obj = {};
+        const currentline = lines[i].split(",");
+        
+        for (let j = 0; j < headers.length; j++) {
+            obj[headers[j].trim()] = currentline[j].trim();
+        }
+        result.push(obj);
+    }
+    return result;
 }
 
 function startQuiz() {
-    currentQuestionIndex = 0;
-    displayQuestion();
+    let currentQuestionIndex = 0;
+    displayQuestion(currentQuestionIndex);
+
+    document.getElementById("nextButton").addEventListener("click", function () {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            displayQuestion(currentQuestionIndex);
+        } else {
+            alert("퀴즈가 끝났습니다!");
+            document.getElementById("quizContainer").classList.add("hidden");
+            document.querySelector(".selection").classList.remove("hidden");
+        }
+    });
+
+    document.getElementById("backButton").addEventListener("click", function () {
+        document.getElementById("quizContainer").classList.add("hidden");
+        document.querySelector(".selection").classList.remove("hidden");
+    });
 }
 
-function displayQuestion() {
-    const question = questions[currentQuestionIndex];
-    document.getElementById("questionText").textContent = `문제 ${currentQuestionIndex + 1}: ${question.문제}`;
-    document.getElementById("label1").textContent = question.선택지1;
-    document.getElementById("label2").textContent = question.선택지2;
-    document.getElementById("label3").textContent = question.선택지3;
-    document.getElementById("label4").textContent = question.선택지4;
-}
-
-function restartQuiz() {
-    document.getElementById("quizContainer").classList.add("hidden");
-    document.querySelector(".selection").classList.remove("hidden");
+function displayQuestion(index) {
+    const questionObj = questions[index];
+    document.getElementById("question").textContent = `문제 ${index + 1}: ${questionObj.문제}`;
+    
+    const form = document.getElementById("answersForm");
+    form.innerHTML = ""; // 이전 답변을 초기화
+    for (let i = 1; i <= 4; i++) {
+        const label = document.createElement("label");
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "answer";
+        radio.value = i;
+        label.appendChild(radio);
+        label.append(` 선택지${i} 내용`);
+        form.appendChild(label);
+        form.appendChild(document.createElement("br"));
+    }
 }
