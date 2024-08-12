@@ -56,9 +56,6 @@
             font-weight: bold;
             color: #ffa64d;
         }
-        #backButton {
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
@@ -71,8 +68,8 @@
         <div id="examSelection">
             <label for="examSelect">시험 회차를 선택하세요:</label>
             <select id="examSelect">
-                <option value="2022_01">2022년 1회차</option>
-                <option value="2022_02">2022년 2회차</option>
+                <option value="2022_01_skin_test60 - 시트1.csv">2022년 1회차</option>
+                <option value="2022_02_skin_test60 - 시트1.csv">2022년 2회차</option>
             </select>
 
             <button onclick="startQuiz()">시작하기</button>
@@ -82,69 +79,80 @@
         <div id="quizContainer" style="display:none;"></div>
 
         <button id="nextButton" onclick="showNextQuestion()" style="display:none;">다음</button>
-        <button id="backButton" onclick="goBack()" style="display:none;">첫 화면으로 돌아가기</button>
+
+        <button id="returnButton" onclick="returnToStart()" style="display:none;">첫 화면으로 돌아가기</button>
 
         <div id="result" class="result"></div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script>
-        const examData = {};
-
-        function loadCSV(fileName, examId) {
-            Papa.parse(fileName, {
-                download: true,
-                header: true,
-                complete: function(results) {
-                    examData[examId] = results.data;
-                    console.log(`Data for ${examId} loaded.`, examData[examId]);
-                },
-                error: function(error) {
-                    console.error("Error loading CSV:", error);
-                    alert("CSV 파일을 불러오는 중 오류가 발생했습니다.");
-                }
-            });
-        }
-
-        loadCSV('2022_01_skin_test60.csv', '2022_01');
-        loadCSV('2022_02_skin_test60.csv', '2022_02');
-
-        let questions = [];
+        let exams = {};
+        let currentExam = null;
         let currentQuestionIndex = 0;
         let score = 0;
 
         function startQuiz() {
             const selectedExam = document.getElementById('examSelect').value;
-            questions = examData[selectedExam];
-            if (!questions || questions.length === 0) {
-                alert("문제를 로드하는 데 실패했습니다. 데이터를 확인하세요.");
-                return;
-            }
+            fetch(selectedExam)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    const parsedData = parseCSV(data);
+                    exams = parsedData;
+                    currentExam = exams;
 
-            currentQuestionIndex = 0;
-            score = 0;
+                    if (!currentExam || !currentExam.questions) {
+                        alert('유효한 시험 회차를 선택하세요.');
+                        return;
+                    }
 
-            document.getElementById('examSelection').style.display = 'none';
-            document.getElementById('quizContainer').style.display = 'block';
-            document.getElementById('nextButton').style.display = 'block';
-            document.getElementById('backButton').style.display = 'block';
+                    currentQuestionIndex = 0;
+                    score = 0;
 
-            loadQuestion();
+                    document.getElementById('examSelection').style.display = 'none';
+                    document.getElementById('quizContainer').style.display = 'block';
+                    document.getElementById('nextButton').style.display = 'block';
+                    document.getElementById('returnButton').style.display = 'block';
+
+                    loadQuestion();
+                })
+                .catch(error => {
+                    console.error('Error loading CSV:', error);
+                    alert('CSV 파일을 불러오는 중 오류가 발생했습니다.');
+                });
+        }
+
+        function parseCSV(data) {
+            const rows = data.split('\n').slice(1);
+            const questions = rows.map(row => {
+                const cols = row.split(',');
+                return {
+                    question: cols[1],
+                    choices: [cols[2], cols[3], cols[4], cols[5]],
+                    answer: parseInt(cols[6]),
+                    explanation: cols[7]
+                };
+            });
+
+            return { questions };
         }
 
         function loadQuestion() {
             const quizContainer = document.getElementById('quizContainer');
-            const questionData = questions[currentQuestionIndex];
+            const questionData = currentExam.questions[currentQuestionIndex];
 
             quizContainer.innerHTML = `
                 <div class="question">
-                    <label>문제 ${currentQuestionIndex + 1}: ${questionData['문제']}</label>
+                    <label>문제 ${currentQuestionIndex + 1}: ${questionData.question}</label>
                 </div>
                 <div class="choices">
-                    <label><input type="radio" name="answer" value="0"> ① ${questionData['선택지1']}</label>
-                    <label><input type="radio" name="answer" value="1"> ② ${questionData['선택지2']}</label>
-                    <label><input type="radio" name="answer" value="2"> ③ ${questionData['선택지3']}</label>
-                    <label><input type="radio" name="answer" value="3"> ④ ${questionData['선택지4']}</label>
+                    ${questionData.choices.map((choice, index) => `
+                        <label><input type="radio" name="answer" value="${index}"> ${choice}</label>
+                    `).join('')}
                 </div>
             `;
         }
@@ -156,16 +164,13 @@
                 return;
             }
 
-            const isCorrect = parseInt(selectedAnswer.value) === parseInt(questions[currentQuestionIndex]['정답인덱스']);
-            if (isCorrect) {
+            if (parseInt(selectedAnswer.value) === currentExam.questions[currentQuestionIndex].answer) {
                 score++;
             }
 
-            alert(isCorrect ? "정답입니다!" : "오답입니다. 정답: " + questions[currentQuestionIndex][`선택지${parseInt(questions[currentQuestionIndex]['정답인덱스']) + 1}`] + "\n해설: " + questions[currentQuestionIndex]['해설']);
-
             currentQuestionIndex++;
 
-            if (currentQuestionIndex < questions.length) {
+            if (currentQuestionIndex < currentExam.questions.length) {
                 loadQuestion();
             } else {
                 showResult();
@@ -175,15 +180,15 @@
         function showResult() {
             document.getElementById('quizContainer').style.display = 'none';
             document.getElementById('nextButton').style.display = 'none';
-            document.getElementById('result').innerText = `총 ${questions.length}문제 중 ${score}문제를 맞추셨습니다.`;
+            document.getElementById('result').innerText = `총 ${currentExam.questions.length}문제 중 ${score}문제를 맞추셨습니다.`;
             document.getElementById('result').style.display = 'block';
         }
 
-        function goBack() {
+        function returnToStart() {
             document.getElementById('quizContainer').style.display = 'none';
             document.getElementById('nextButton').style.display = 'none';
             document.getElementById('result').style.display = 'none';
-            document.getElementById('backButton').style.display = 'none';
+            document.getElementById('returnButton').style.display = 'none';
             document.getElementById('examSelection').style.display = 'block';
         }
     </script>
