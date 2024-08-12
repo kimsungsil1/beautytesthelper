@@ -87,17 +87,27 @@
         <div id="result" class="result"></div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script>
-        const examData = {
-            "2022_01": [
-                { "문제": "에스테틱에서 각질 제거의 의미는 무엇인가?", "선택지1": "선택지1 내용", "선택지2": "선택지2 내용", "선택지3": "선택지3 내용", "선택지4": "선택지4 내용", "정답인덱스": "1", "해설": "해설 내용" },
-                // 나머지 59문제를 이 형식으로 추가합니다.
-            ],
-            "2022_02": [
-                { "문제": "2022년 2회차 문제 1", "선택지1": "선택지1 내용", "선택지2": "선택지2 내용", "선택지3": "선택지3 내용", "선택지4": "선택지4 내용", "정답인덱스": "2", "해설": "해설 내용" },
-                // 나머지 59문제를 이 형식으로 추가합니다.
-            ]
-        };
+        const examData = {};
+
+        function loadCSV(fileName, examId) {
+            Papa.parse(fileName, {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    examData[examId] = results.data;
+                    console.log(`Data for ${examId} loaded.`, examData[examId]);
+                },
+                error: function(error) {
+                    console.error("Error loading CSV:", error);
+                    alert("CSV 파일을 불러오는 중 오류가 발생했습니다.");
+                }
+            });
+        }
+
+        loadCSV('2022_01_skin_test60.csv', '2022_01');
+        loadCSV('2022_02_skin_test60.csv', '2022_02');
 
         let questions = [];
         let currentQuestionIndex = 0;
@@ -123,13 +133,13 @@
 
             quizContainer.innerHTML = `
                 <div class="question">
-                    <label>문제 ${currentQuestionIndex + 1}: ${questionData.문제}</label>
+                    <label>문제 ${currentQuestionIndex + 1}: ${questionData['문제']}</label>
                 </div>
                 <div class="choices">
-                    <label><input type="radio" name="answer" value="0"> ① ${questionData.선택지1}</label>
-                    <label><input type="radio" name="answer" value="1"> ② ${questionData.선택지2}</label>
-                    <label><input type="radio" name="answer" value="2"> ③ ${questionData.선택지3}</label>
-                    <label><input type="radio" name="answer" value="3"> ④ ${questionData.선택지4}</label>
+                    <label><input type="radio" name="answer" value="0"> ① ${questionData['선택지1']}</label>
+                    <label><input type="radio" name="answer" value="1"> ② ${questionData['선택지2']}</label>
+                    <label><input type="radio" name="answer" value="2"> ③ ${questionData['선택지3']}</label>
+                    <label><input type="radio" name="answer" value="3"> ④ ${questionData['선택지4']}</label>
                 </div>
             `;
         }
@@ -141,12 +151,12 @@
                 return;
             }
 
-            const isCorrect = parseInt(selectedAnswer.value) === parseInt(questions[currentQuestionIndex].정답인덱스);
+            const isCorrect = parseInt(selectedAnswer.value) === parseInt(questions[currentQuestionIndex]['정답인덱스']);
             if (isCorrect) {
                 score++;
             }
 
-            alert(isCorrect ? "정답입니다!" : "오답입니다. 정답: " + questions[currentQuestionIndex][`선택지${parseInt(questions[currentQuestionIndex].정답인덱스) + 1}`] + "\n해설: " + questions[currentQuestionIndex].해설);
+            alert(isCorrect ? "정답입니다!" : "오답입니다. 정답: " + questions[currentQuestionIndex][`선택지${parseInt(questions[currentQuestionIndex]['정답인덱스']) + 1}`] + "\n해설: " + questions[currentQuestionIndex]['해설']);
 
             currentQuestionIndex++;
 
