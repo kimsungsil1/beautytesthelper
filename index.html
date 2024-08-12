@@ -180,13 +180,13 @@
 
             quizContainer.innerHTML = `
                 <div class="question">
-                    <label>${questionData.question}</label>
+                    <label>문제 ${currentQuestionIndex + 1}: ${questionData.question}</label>
                 </div>
                 <div class="choices">
-                    <label><input type="radio" name="answer" value="0">${questionData.choices[0]}</label>
-                    <label><input type="radio" name="answer" value="1">${questionData.choices[1]}</label>
-                    <label><input type="radio" name="answer" value="2">${questionData.choices[2]}</label>
-                    <label><input type="radio" name="answer" value="3">${questionData.choices[3]}</label>
+                    <label><input type="radio" name="answer" value="0"> 1. ${questionData.choices[0]}</label>
+                    <label><input type="radio" name="answer" value="1"> 2. ${questionData.choices[1]}</label>
+                    <label><input type="radio" name="answer" value="2"> 3. ${questionData.choices[2]}</label>
+                    <label><input type="radio" name="answer" value="3"> 4. ${questionData.choices[3]}</label>
                 </div>
                 <div id="feedback" class="feedback"></div>
             `;
