@@ -3,13 +3,14 @@ const sheetId = '1Nmlr7XYc_n57UK-mglyOOJMTLwPur9-STi4390wlCNc';
 
 function fetchDataFromGoogleSheet() {
     const examRound = document.getElementById("examRound").value; // 선택한 시험 회차 가져오기
+    console.log(`Fetching data for sheet: ${examRound}`);
 
     Tabletop.init({
         key: sheetId,
         simpleSheet: true,
         wanted: [examRound], // 선택한 시험 회차를 시트 이름으로 설정
         callback: function(data, tabletop) {
-            console.log(data); // 데이터를 콘솔에 출력하여 확인
+            console.log("Data successfully fetched:", data);
             startQuiz(data);
         },
         error: function(error) {
@@ -20,10 +21,12 @@ function fetchDataFromGoogleSheet() {
 }
 
 document.getElementById("startButton").addEventListener("click", function () {
+    console.log("Start button clicked");
     fetchDataFromGoogleSheet(); // Google Sheets에서 데이터 가져오기
 });
 
 function startQuiz(questions) {
+    console.log("Starting quiz with questions:", questions);
     document.querySelector(".selection").classList.add("hidden");
     document.getElementById("quizContainer").classList.remove("hidden");
 
@@ -48,6 +51,8 @@ function startQuiz(questions) {
 
 function displayQuestion(questions, index) {
     const questionObj = questions[index];
+    console.log(`Displaying question ${index + 1}:`, questionObj);
+
     document.getElementById("question").textContent = `문제 ${index + 1}: ${questionObj['문제']}`;
 
     const form = document.getElementById("answersForm");
