@@ -1,3 +1,4 @@
+/* 기본 바디 스타일 */
 body {
     font-family: 'Roboto', Arial, sans-serif;
     background-color: #f2f2f2;
@@ -9,6 +10,7 @@ body {
     height: 100vh;
 }
 
+/* 컨테이너 스타일 */
 .container {
     background-color: #ffffff;
     padding: 30px;
@@ -19,24 +21,41 @@ body {
     width: 100%;
 }
 
+/* 제목 스타일 */
 h1 {
     font-size: 28px;
     color: #333333;
     margin-bottom: 20px;
 }
 
+/* 문제 텍스트 스타일 */
+#question {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #444444;
+}
+
+/* 라벨 스타일 (선택지) */
 label {
     display: block;
     margin-top: 15px;
     font-size: 18px;
     color: #555555;
     cursor: pointer;
+    transition: color 0.3s ease;
 }
 
+/* 선택지 라디오 버튼 스타일 */
 input[type="radio"] {
     margin-right: 10px;
 }
 
+/* 선택지 호버 효과 */
+label:hover {
+    color: #FF6347;
+}
+
+/* 드롭다운과 버튼 스타일 */
 select, button {
     margin-top: 15px;
     padding: 10px;
@@ -49,34 +68,58 @@ select, button {
     transition: background-color 0.3s ease;
 }
 
+/* 버튼 호버 효과 */
 button:hover {
     background-color: #FF6347;
 }
 
+/* 버튼 활성화 상태 */
 button:active {
     background-color: #FF4500;
 }
 
-#quizContainer {
-    margin-top: 20px;
-}
-
+/* 숨김 처리 */
 .hidden {
     display: none;
 }
 
+/* 퀴즈 컨테이너 마진 조정 */
+#quizContainer {
+    margin-top: 20px;
+}
+
+/* 버튼 크기 및 배치 */
 #nextButton, #backButton {
     width: 48%;
     margin: 10px 1%;
     font-size: 16px;
 }
 
-#question {
-    font-size: 20px;
-    margin-bottom: 20px;
-    color: #444444;
-}
+/* 반응형 디자인 - 작은 화면에서의 레이아웃 조정 */
+@media (max-width: 600px) {
+    /* 컨테이너의 패딩과 너비 조정 */
+    .container {
+        padding: 20px;
+    }
 
-label:hover {
-    color: #FF6347;
+    /* 제목 크기 조정 */
+    h1 {
+        font-size: 24px;
+    }
+
+    /* 라벨(선택지) 크기 조정 */
+    label {
+        font-size: 16px;
+    }
+
+    /* 버튼 크기 및 배치 조정 */
+    button {
+        font-size: 16px;
+        padding: 8px;
+    }
+
+    #nextButton, #backButton {
+        width: 100%;
+        margin: 5px 0;
+    }
 }
