@@ -1,3 +1,9 @@
+let timer;
+let timeLimit = 600; // 10분
+let score = 0;
+let bookmarks = [];
+let questions = [];
+
 document.getElementById("startButton").addEventListener("click", function () {
     const examRound = document.getElementById("examRound").value;
     const filePath = `${examRound}.csv`;
@@ -16,9 +22,10 @@ document.getElementById("startButton").addEventListener("click", function () {
             if (questions.length === 0) {
                 throw new Error("CSV 파일에 질문 데이터가 없습니다.");
             }
-            console.log(questions); // 파싱된 질문 데이터 확인
+            console.log(questions);
             document.querySelector(".selection").classList.add("hidden");
             document.getElementById("quizContainer").classList.remove("hidden");
+            startTimer(timeLimit);
             startQuiz();
         })
         .catch(error => {
@@ -36,7 +43,7 @@ function parseCSV(data) {
         const currentline = lines[i].split(",");
         if (currentline.length < headers.length) {
             console.log(`Skipping line ${i + 1}: incomplete data`);
-            continue; // 빈 줄 또는 불완전한 줄 건너뛰기
+            continue;
         }
 
         const obj = {};
@@ -53,17 +60,22 @@ function startQuiz() {
     displayQuestion(currentQuestionIndex);
 
     document.getElementById("nextButton").addEventListener("click", function () {
+        checkAnswer(currentQuestionIndex);
         currentQuestionIndex++;
         if (currentQuestionIndex < questions.length) {
             displayQuestion(currentQuestionIndex);
         } else {
-            alert("퀴즈가 끝났습니다!");
-            document.getElementById("quizContainer").classList.add("hidden");
-            document.querySelector(".selection").classList.remove("hidden");
+            endQuiz();
         }
     });
 
+    document.getElementById("bookmarkButton").addEventListener("click", function () {
+        bookmarks.push(currentQuestionIndex);
+        alert("문제가 북마크되었습니다.");
+    });
+
     document.getElementById("backButton").addEventListener("click", function () {
+        clearInterval(timer);
         document.getElementById("quizContainer").classList.add("hidden");
         document.querySelector(".selection").classList.remove("hidden");
     });
@@ -83,10 +95,7 @@ function displayQuestion(index) {
         radio.name = "answer";
         radio.value = i;
 
-        // 선택지 내용을 CSV에서 가져옴
         const choiceText = questionObj[`선택지${i}`] || `선택지${i} 내용`;
-
-        // 선택지 앞에 번호를 추가
         const span = document.createElement("span");
         span.textContent = `${i}.`;
 
@@ -96,4 +105,54 @@ function displayQuestion(index) {
         form.appendChild(label);
         form.appendChild(document.createElement("br"));
     }
+}
+
+function checkAnswer(index) {
+    const form = document.getElementById("answersForm");
+    const selected = form.querySelector('input[name="answer"]:checked');
+    if (selected) {
+        const answer = parseInt(selected.value);
+        const correctAnswer = parseInt(questions[index]["정답 인덱스"]);
+        if (answer === correctAnswer) {
+            score++;
+        }
+    }
+}
+
+function startTimer(duration) {
+    let timeRemaining = duration;
+    timer = setInterval(function () {
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        document.getElementById("time").textContent = `${minutes < 10 ? "0" : ""}${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+        if (--timeRemaining < 0) {
+            clearInterval(timer);
+            endQuiz();
+        }
+    }, 1000);
+}
+
+function endQuiz() {
+    clearInterval(timer);
+    document.getElementById("quizContainer").classList.add("hidden");
+    document.getElementById("resultContainer").classList.remove("hidden");
+
+    // 점수 표시
+    document.getElementById("score").textContent = `${score} / ${questions.length}`;
+
+    // 다시 풀기 버튼 이벤트
+    document.getElementById("retryButton").addEventListener("click", function () {
+        score = 0;
+        bookmarks = [];
+        document.getElementById("resultContainer").classList.add("hidden");
+        startQuiz();
+    });
+
+    // 첫 화면으로 돌아가기 버튼 이벤트
+    document.getElementById("backToSelection").addEventListener("click", function () {
+        score = 0;
+        bookmarks = [];
+        document.getElementById("resultContainer").classList.add("hidden");
+        document.querySelector(".selection").classList.remove("hidden");
+    });
 }
