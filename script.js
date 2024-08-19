@@ -81,4 +81,82 @@ function startQuiz() {
     });
 }
 
-function displayQuestion
+function displayQuestion(index) {
+    const questionObj = questions[index];
+    document.getElementById("question").textContent = `문제 ${index + 1}: ${questionObj['문제']}`;
+
+    const form = document.getElementById("answersForm");
+    form.innerHTML = ""; // 이전 답변을 초기화
+
+    for (let i = 1; i <= 4; i++) {
+        const label = document.createElement("label");
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "answer";
+        radio.value = i;
+
+        const choiceText = questionObj[`선택지${i}`] || `선택지${i} 내용`;
+        const span = document.createElement("span");
+        span.textContent = `${i}.`;
+
+        label.appendChild(radio);
+        label.appendChild(span);
+        label.append(` ${choiceText}`);
+        form.appendChild(label);
+        form.appendChild(document.createElement("br"));
+    }
+}
+
+function checkAnswer(index) {
+    const form = document.getElementById("answersForm");
+    const selected = form.querySelector('input[name="answer"]:checked');
+    if (selected) {
+        const answer = parseInt(selected.value);
+        const correctAnswer = parseInt(questions[index]["정답 인덱스"]);
+        if (answer === correctAnswer) {
+            score++;
+        }
+    }
+}
+
+function startTimer(duration) {
+    let timeRemaining = duration;
+    timer = setInterval(function () {
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        document.getElementById("time").textContent = `${minutes < 10 ? "0" : ""}${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+        if (--timeRemaining < 0) {
+            clearInterval(timer);
+            endQuiz();
+        }
+    }, 1000);
+}
+
+function endQuiz() {
+    clearInterval(timer);
+    document.getElementById("quizContainer").classList.add("hidden");
+    document.getElementById("resultContainer").classList.remove("hidden");
+
+    // 결과를 표시
+    document.getElementById("score").textContent = `${score} / ${questions.length}`;
+    document.getElementById("totalQuestions").textContent = questions.length;
+    document.getElementById("correctAnswers").textContent = score;
+    document.getElementById("wrongAnswers").textContent = questions.length - score;
+    document.getElementById("bookmarkedQuestions").textContent = bookmarks.length;
+
+    // 다시 풀기 버튼 이벤트
+    document.getElementById("retryButton").addEventListener("click", function () {
+        score = 0;
+        bookmarks = [];
+        document.getElementById("resultContainer").classList.add("hidden");
+        startQuiz();
+    });
+
+    // 첫 화면으로 돌아가기 버튼 이벤트
+    document.getElementById("backToSelection").addEventListener("click", function () {
+        score = 0;
+        bookmarks = [];
+        document.getElementById("resultContainer").classList.add("hidden");
+        document.querySelector(".selection").classList.remove("hidden");
+    });
+}
