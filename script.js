@@ -84,7 +84,7 @@ function displayQuestion(index) {
         radio.value = i;
 
         // 선택지 내용을 CSV에서 가져옴
-        const choiceText = questionObj[`선택지 ${i}`] || `선택지${i} 내용`;
+        const choiceText = questionObj[`선택지${i}`] || `선택지${i} 내용`;
         console.log(`선택지 ${i}: ${choiceText}`); // 디버깅을 위해 선택지 출력
         label.appendChild(radio);
         label.append(` ${choiceText}`);
