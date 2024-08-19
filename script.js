@@ -1,6 +1,6 @@
 document.getElementById("startButton").addEventListener("click", function () {
     const examRound = document.getElementById("examRound").value;
-    const filePath = `${examRound}.csv`;
+    const filePath = encodeURIComponent(`${examRound}.csv`);
     console.log("Loading CSV file from:", filePath);
 
     fetch(filePath)
