@@ -3,6 +3,7 @@ const sheetId = '1Nmlr7XYc_n57UK-mglyOOJMTLwPur9-STi4390wlCNc';
 
 function fetchDataFromGoogleSheet() {
     const examRound = document.getElementById("examRound").value; // 선택한 시험 회차 가져오기
+
     Tabletop.init({
         key: sheetId,
         simpleSheet: true,
@@ -23,6 +24,9 @@ document.getElementById("startButton").addEventListener("click", function () {
 });
 
 function startQuiz(questions) {
+    document.querySelector(".selection").classList.add("hidden");
+    document.getElementById("quizContainer").classList.remove("hidden");
+
     let currentQuestionIndex = 0;
     displayQuestion(questions, currentQuestionIndex);
 
