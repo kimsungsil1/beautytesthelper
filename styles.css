@@ -34,18 +34,19 @@ h1 {
     margin-bottom: 20px;
     color: #444444;
     text-align: left; /* 왼쪽 정렬 */
+    width: 100%; /* 전체 너비 사용 */
 }
 
 /* 라벨 스타일 (선택지) */
 label {
-    display: flex;
-    align-items: center;
+    display: block;
     margin-top: 15px;
     font-size: 18px;
     color: #555555;
     cursor: pointer;
     transition: color 0.3s ease;
     text-align: left; /* 왼쪽 정렬 */
+    width: 100%; /* 전체 너비 사용 */
 }
 
 /* 라디오 버튼과 선택지 번호 정렬 */
@@ -76,7 +77,6 @@ select, button {
     color: white;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    text-align: center;
 }
 
 /* 버튼 호버 효과 */
