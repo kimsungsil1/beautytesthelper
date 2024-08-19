@@ -12,34 +12,36 @@ document.getElementById("startButton").addEventListener("click", function () {
         })
         .then(data => {
             console.log("CSV file loaded successfully");
-            console.log(data); // CSV 원본 데이터를 콘솔에 출력하여 형식을 확인
             questions = parseCSV(data);
+            if (questions.length === 0) {
+                throw new Error("CSV 파일에 질문 데이터가 없습니다.");
+            }
             console.log(questions); // 파싱된 질문 데이터 확인
             document.querySelector(".selection").classList.add("hidden");
             document.getElementById("quizContainer").classList.remove("hidden");
             startQuiz();
         })
         .catch(error => {
-            alert("CSV 파일을 불러오는 중 오류가 발생했습니다.");
+            alert("CSV 파일을 불러오는 중 오류가 발생했습니다. 파일을 확인해주세요.");
             console.error("Error loading CSV file:", error);
         });
 });
 
 function parseCSV(data) {
-    const lines = data.split("\n");
+    const lines = data.split("\n").filter(line => line.trim() !== "");
     const result = [];
-    const headers = lines[0].split(",");
+    const headers = lines[0].split(",").map(header => header.trim());
 
     for (let i = 1; i < lines.length; i++) {
         const currentline = lines[i].split(",");
         if (currentline.length < headers.length) {
-            console.log(`Skipping line ${i}: incomplete data`);
+            console.log(`Skipping line ${i + 1}: incomplete data`);
             continue; // 빈 줄 또는 불완전한 줄 건너뛰기
         }
 
         const obj = {};
         for (let j = 0; j < headers.length; j++) {
-            obj[headers[j].trim()] = currentline[j].trim();
+            obj[headers[j]] = currentline[j].trim();
         }
         result.push(obj);
     }
