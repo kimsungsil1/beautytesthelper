@@ -33,16 +33,26 @@ h1 {
     font-size: 20px;
     margin-bottom: 20px;
     color: #444444;
+    text-align: left;
 }
 
 /* 라벨 스타일 (선택지) */
 label {
-    display: block;
+    display: flex;
+    align-items: center;
     margin-top: 15px;
     font-size: 18px;
     color: #555555;
     cursor: pointer;
     transition: color 0.3s ease;
+    text-align: left;
+}
+
+/* 라디오 버튼과 선택지 번호 정렬 */
+label span {
+    margin-right: 10px;
+    font-weight: bold;
+    font-size: 18px;
 }
 
 /* 선택지 라디오 버튼 스타일 */
