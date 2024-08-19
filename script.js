@@ -1,47 +1,26 @@
-// Google Sheets ID와 시트 이름 설정
+// Google Sheets ID 설정
 const sheetId = '1Nmlr7XYc_n57UK-mglyOOJMTLwPur9-STi4390wlCNc';
-const sheetName = '2022_01_skin_test60'; // 시트 이름 정확히 반영
-
-// Google Sheets의 CSV 형식 데이터 URL
-const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${sheetName}`;
 
 function fetchDataFromGoogleSheet() {
-    fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Network response was not ok: ${response.statusText}`);
-            }
-            return response.text();
-        })
-        .then(csvData => {
-            const parsedData = parseCSV(csvData);
-            console.log(parsedData); // 파싱된 데이터를 콘솔에 출력
-            startQuiz(parsedData);
-        })
-        .catch(error => {
+    const examRound = document.getElementById("examRound").value; // 선택한 시험 회차 가져오기
+    Tabletop.init({
+        key: sheetId,
+        simpleSheet: true,
+        wanted: [examRound], // 선택한 시험 회차를 시트 이름으로 설정
+        callback: function(data, tabletop) {
+            console.log(data); // 데이터를 콘솔에 출력하여 확인
+            startQuiz(data);
+        },
+        error: function(error) {
             console.error('Error fetching data from Google Sheets:', error);
             alert('CSV 파일을 불러오는 중 오류가 발생했습니다. 파일을 확인해주세요.');
-        });
-}
-
-function parseCSV(csvData) {
-    const lines = csvData.split("\n").map(line => line.trim()).filter(line => line !== "");
-    if (lines.length === 0) {
-        throw new Error("CSV 파일이 비어있습니다.");
-    }
-    
-    const headers = lines[0].split(",").map(header => header.trim());
-    const rows = lines.slice(1);
-
-    return rows.map(row => {
-        const values = row.split(",");
-        const result = {};
-        headers.forEach((header, index) => {
-            result[header] = values[index].trim();
-        });
-        return result;
+        }
     });
 }
+
+document.getElementById("startButton").addEventListener("click", function () {
+    fetchDataFromGoogleSheet(); // Google Sheets에서 데이터 가져오기
+});
 
 function startQuiz(questions) {
     let currentQuestionIndex = 0;
@@ -110,7 +89,3 @@ function endQuiz(questions) {
     document.getElementById("quizContainer").classList.add("hidden");
     document.querySelector(".selection").classList.remove("hidden");
 }
-
-document.getElementById("startButton").addEventListener("click", function () {
-    fetchDataFromGoogleSheet();
-});
