@@ -16,7 +16,6 @@ body {
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
     max-width: 600px;
     width: 100%;
 }
@@ -26,6 +25,7 @@ h1 {
     font-size: 28px;
     color: #333333;
     margin-bottom: 20px;
+    text-align: center;
 }
 
 /* 문제 텍스트 스타일 */
@@ -33,7 +33,7 @@ h1 {
     font-size: 20px;
     margin-bottom: 20px;
     color: #444444;
-    text-align: left;
+    text-align: left; /* 왼쪽 정렬 */
 }
 
 /* 라벨 스타일 (선택지) */
@@ -45,7 +45,7 @@ label {
     color: #555555;
     cursor: pointer;
     transition: color 0.3s ease;
-    text-align: left;
+    text-align: left; /* 왼쪽 정렬 */
 }
 
 /* 라디오 버튼과 선택지 번호 정렬 */
@@ -76,6 +76,7 @@ select, button {
     color: white;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    text-align: center;
 }
 
 /* 버튼 호버 효과 */
